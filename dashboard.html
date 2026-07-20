@@ -134,7 +134,10 @@ async function loadData() {
       return;
     }
     const data = await resp.json();
-    const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+    const binary = atob(data.content);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const content = JSON.parse(new TextDecoder('utf-8').decode(bytes));
     allData = content.submissions || [];
     if (allData.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4"><div class="empty">暂无提交记录</div></td></tr>';

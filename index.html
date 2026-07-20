@@ -133,7 +133,11 @@ async function getExistingData() {
     });
     if (!resp.ok) return { submissions: [], sha: null };
     const data = await resp.json();
-    const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+    // UTF-8 安全解码：base64 → Uint8Array → TextDecoder
+    const binary = atob(data.content);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const content = JSON.parse(new TextDecoder('utf-8').decode(bytes));
     return { submissions: content.submissions || [], sha: data.sha };
   } catch (e) {
     return { submissions: [], sha: null };
@@ -141,7 +145,12 @@ async function getExistingData() {
 }
 
 async function saveData(submissions, sha) {
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify({ submissions }, null, 2))));
+  // UTF-8 安全编码：TextEncoder → Uint8Array → base64
+  const jsonStr = JSON.stringify({ submissions }, null, 2);
+  const utf8Bytes = new TextEncoder().encode(jsonStr);
+  let binary = '';
+  for (let i = 0; i < utf8Bytes.length; i++) binary += String.fromCharCode(utf8Bytes[i]);
+  const content = btoa(binary);
   const body = { message: `提交笔记 ${new Date().toISOString()}`, content };
   if (sha) body.sha = sha;
   const resp = await fetch(API_BASE, {
