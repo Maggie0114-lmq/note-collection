@@ -133,7 +133,7 @@ async function getExistingData() {
     });
     if (!resp.ok) return { submissions: [], sha: null };
     const data = await resp.json();
-    const content = JSON.parse(atob(data.content));
+    const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
     return { submissions: content.submissions || [], sha: data.sha };
   } catch (e) {
     return { submissions: [], sha: null };
