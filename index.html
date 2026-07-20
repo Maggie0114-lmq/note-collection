@@ -64,9 +64,8 @@ https://www.xiaohongshu.com/explore/6def..."></textarea>
     <div class="preview-list" id="previewList"></div>
   </div>
   <button class="btn" id="submitBtn" onclick="submitForm()">提交</button>
-  <div class="history" id="historySection" style="display:none;">
-    <div class="history-title">📋 我的提交记录</div>
-    <div id="historyList"></div>
+  <div style="text-align:center;padding:24px 0 8px;color:#666;font-size:14px;">
+    跟着 redshop，轻松出海 🚀
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -195,7 +194,6 @@ async function submitForm() {
       showToast(`成功提交 ${newRecords.length} 条笔记`, 'success');
       document.getElementById('noteLinks').value = '';
       updatePreview();
-      loadHistory();
     } else {
       showToast('提交失败，请重试', 'error');
     }
@@ -205,21 +203,7 @@ async function submitForm() {
   btn.disabled = false; btn.textContent = '提交';
 }
 
-async function loadHistory() {
-  const data = await getExistingData();
-  const section = document.getElementById('historySection');
-  const list = document.getElementById('historyList');
-  if (data.submissions.length === 0) { section.style.display = 'none'; return; }
-  section.style.display = 'block';
-  const recent = data.submissions.slice(-10).reverse();
-  list.innerHTML = recent.map(s => 
-    `<div class="history-item"><div><div class="shop">${escapeHtml(s.shop_name)}</div><div class="note-id">${s.note_id.substring(0,16)}...</div></div><div class="time">${s.submit_time ? new Date(s.submit_time).toLocaleDateString('zh-CN') : '-'}</div></div>`
-  ).join('');
-}
-
 function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
-
-loadHistory();
 </script>
 </body>
 </html>
