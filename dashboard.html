@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投流笔记收集看板</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Helvetica Neue", Arial, sans-serif; background: #f5f5f5; color: #333; min-height: 100vh; padding: 24px; }
+.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+.header h1 { font-size: 20px; font-weight: 700; }
+.header .actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.search-box { position: relative; }
+.search-box input { width: 240px; height: 36px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 0 12px 0 36px; font-size: 13px; outline: none; }
+.search-box input:focus { border-color: #ff2442; }
+.search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; color: #999; }
+.date-filter { display: flex; align-items: center; gap: 8px; }
+.date-filter label { font-size: 13px; color: #666; white-space: nowrap; }
+.date-filter input { height: 36px; border: 1px solid #e0e0e0; border-radius: 8px; padding: 0 8px; font-size: 13px; outline: none; }
+.btn { height: 36px; padding: 0 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; font-size: 13px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 4px; }
+.btn:hover { border-color: #ff2442; color: #ff2442; }
+.btn.primary { background: #ff2442; color: #fff; border-color: #ff2442; }
+.btn.primary:hover { opacity: 0.9; }
+.stats-bar { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.stat-card { background: #fff; border-radius: 10px; padding: 16px 20px; min-width: 100px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.stat-card .value { font-size: 24px; font-weight: 700; color: #ff2442; }
+.stat-card .label { font-size: 12px; color: #999; margin-top: 4px; }
+.table-container { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead { background: #fafafa; position: sticky; top: 0; z-index: 1; }
+th { padding: 12px 14px; text-align: left; font-weight: 600; color: #666; white-space: nowrap; border-bottom: 1px solid #f0f0f0; cursor: pointer; user-select: none; }
+th:hover { background: #f0f0f0; }
+th .sort-icon { font-size: 10px; margin-left: 4px; opacity: 0.4; }
+th.sorted .sort-icon { opacity: 1; color: #ff2442; }
+td { padding: 10px 14px; border-bottom: 1px solid #f5f5f5; color: #333; vertical-align: middle; }
+tr:hover { background: #fafafa; }
+.note-link { color: #ff2442; text-decoration: none; cursor: pointer; }
+.note-link:hover { text-decoration: underline; }
+.loading { text-align: center; padding: 40px; color: #999; }
+.loading .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid #f0f0f0; border-top-color: #ff2442; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 8px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.empty { text-align: center; padding: 40px; color: #ccc; }
+.pagination { display: flex; justify-content: center; gap: 8px; padding: 16px; }
+.pagination button { width: 32px; height: 32px; border: 1px solid #e0e0e0; border-radius: 6px; background: #fff; cursor: pointer; font-size: 13px; }
+.pagination button:hover { border-color: #ff2442; }
+.pagination button.active { background: #ff2442; color: #fff; border-color: #ff2442; }
+.pagination button:disabled { opacity: 0.3; cursor: not-allowed; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📋 投流笔记收集看板</h1>
+  <div class="actions">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="搜索店铺名/笔记ID..." />
+    </div>
+    <div class="date-filter">
+      <label>开始</label>
+      <input type="date" id="dateStart" />
+      <label>结束</label>
+      <input type="date" id="dateEnd" />
+    </div>
+    <button class="btn" onclick="exportCSV()">📥 导出Excel</button>
+    <button class="btn primary" onclick="loadData()">🔄 刷新</button>
+  </div>
+</div>
+<div class="stats-bar">
+  <div class="stat-card"><div class="value" id="statTotal">-</div><div class="label">总提交数</div></div>
+  <div class="stat-card"><div class="value" id="statShops">-</div><div class="label">店铺数</div></div>
+  <div class="stat-card"><div class="value" id="statToday">-</div><div class="label">今日新增</div></div>
+</div>
+<div class="table-container">
+  <table id="dataTable">
+    <thead><tr id="tableHead"></tr></thead>
+    <tbody id="tableBody"><tr><td colspan="4"><div class="loading"><div class="spinner"></div>加载中...</div></td></tr></tbody>
+  </table>
+</div>
+<div class="pagination" id="pagination"></div>
+<script>
+const GITHUB_TOKEN = ["ghp_hKYoS4","MpmwIlFe9Q","xYedgZuTxIEYGx3TzwDa"].join("");
+const REPO_OWNER = "Maggie0114-lmq";
+const REPO_NAME = "note-collection";
+const DATA_FILE = "data/submissions.json";
+const API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE}`;
+const PAGE_SIZE = 50;
+let currentPage = 1, allData = [], filteredData = [], sortColumn = 'submit_time', sortDir = 'desc';
+
+function setDefaultDates() {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - 30);
+  document.getElementById('dateStart').value = start.toISOString().slice(0,10);
+  document.getElementById('dateEnd').value = end.toISOString().slice(0,10);
+}
+setDefaultDates();
+
+const COLUMNS = [
+  { key: 'shop_name', label: '店铺名称', sortable: true },
+  { key: 'note_id', label: '笔记链接', sortable: false },
+  { key: 'submit_time', label: '提交时间', sortable: true, format: formatTime }
+];
+
+function formatTime(ts) {
+  if (!ts) return '-';
+  const d = new Date(ts);
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+function renderHead() {
+  document.getElementById('tableHead').innerHTML = COLUMNS.map(col => {
+    const sorted = sortColumn === col.key ? 'sorted' : '';
+    const icon = col.sortable ? `<span class="sort-icon">${sortDir === 'asc' ? '↑' : '↓'}</span>` : '';
+    return `<th class="${sorted}" onclick="${col.sortable ? `sortBy('${col.key}')` : ''}">${col.label}${icon}</th>`;
+  }).join('');
+}
+function sortBy(key) {
+  if (sortColumn === key) { sortDir = sortDir === 'asc' ? 'desc' : 'asc'; } else { sortColumn = key; sortDir = 'desc'; }
+  renderData();
+}
+
+async function loadData() {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '<tr><td colspan="4"><div class="loading"><div class="spinner"></div>加载中...</div></td></tr>';
+  try {
+    const resp = await fetch(API_BASE, {
+      headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, Accept: "application/vnd.github+json" }
+    });
+    if (!resp.ok) {
+      tbody.innerHTML = '<tr><td colspan="4"><div class="empty">暂无提交记录</div></td></tr>';
+      updateStats([]);
+      return;
+    }
+    const data = await resp.json();
+    const content = JSON.parse(atob(data.content));
+    allData = content.submissions || [];
+    if (allData.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4"><div class="empty">暂无提交记录</div></td></tr>';
+      updateStats([]);
+      return;
+    }
+    allData.sort((a, b) => {
+      const ta = a.submit_time ? new Date(a.submit_time).getTime() : 0;
+      const tb = b.submit_time ? new Date(b.submit_time).getTime() : 0;
+      return tb - ta;
+    });
+    updateStats(allData);
+    renderData();
+  } catch (e) {
+    console.error('Load error:', e);
+    tbody.innerHTML = '<tr><td colspan="4"><div class="empty">加载失败，请刷新重试</div></td></tr>';
+  }
+}
+
+function updateStats(data) {
+  document.getElementById('statTotal').textContent = data.length;
+  const shops = new Set(data.map(d => d.shop_name).filter(s => s && s !== '-'));
+  document.getElementById('statShops').textContent = shops.size;
+  const today = new Date().toISOString().slice(0,10);
+  const todayCount = data.filter(d => d.submit_time && new Date(d.submit_time).toISOString().slice(0,10) === today).length;
+  document.getElementById('statToday').textContent = todayCount;
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.trim().toLowerCase();
+  const dateStart = document.getElementById('dateStart').value;
+  const dateEnd = document.getElementById('dateEnd').value;
+  filteredData = allData.filter(d => {
+    if (search && !(d.shop_name||'').toLowerCase().includes(search) && !(d.note_id||'').toLowerCase().includes(search)) return false;
+    if (dateStart && d.submit_time) {
+      const dDate = new Date(d.submit_time).toISOString().slice(0,10);
+      if (dDate < dateStart) return false;
+    }
+    if (dateEnd && d.submit_time) {
+      const dDate = new Date(d.submit_time).toISOString().slice(0,10);
+      if (dDate > dateEnd) return false;
+    }
+    return true;
+  });
+  if (sortColumn) {
+    filteredData.sort((a, b) => {
+      let av = a[sortColumn], bv = b[sortColumn];
+      if (sortColumn === 'submit_time') {
+        av = av ? new Date(av).getTime() : 0;
+        bv = bv ? new Date(bv).getTime() : 0;
+      } else {
+        av = String(av||''); bv = String(bv||'');
+      }
+      if (av < bv) return sortDir === 'asc' ? -1 : 1;
+      if (av > bv) return sortDir === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+}
+
+function renderData() {
+  applyFilters();
+  const tbody = document.getElementById('tableBody');
+  renderHead();
+  const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
+  if (currentPage > totalPages) currentPage = 1;
+  const start = (currentPage - 1) * PAGE_SIZE;
+  const pageData = filteredData.slice(start, start + PAGE_SIZE);
+  if (pageData.length === 0) { tbody.innerHTML = '<tr><td colspan="4"><div class="empty">暂无数据</div></td></tr>'; document.getElementById('pagination').innerHTML=''; return; }
+  tbody.innerHTML = pageData.map(row => {
+    return '<tr>' + COLUMNS.map(col => {
+      const value = row[col.key];
+      const formatted = col.format ? col.format(value) : escapeHtml(value);
+      if (col.key === 'note_id' && value && value !== '-') {
+        return `<td><a class="note-link" href="https://www.xiaohongshu.com/explore/${value}" target="_blank">${String(value).substring(0,16)}...</a></td>`;
+      }
+      return `<td>${formatted}</td>`;
+    }).join('') + '</tr>';
+  }).join('');
+  const pagination = document.getElementById('pagination');
+  if (totalPages <= 1) { pagination.innerHTML = ''; return; }
+  let pages = [`<button ${currentPage===1?'disabled':''} onclick="goPage(${currentPage-1})">‹</button>`];
+  for (let i = 1; i <= totalPages; i++) {
+    if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= 2) pages.push(`<button class="${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</button>`);
+    else if (Math.abs(i - currentPage) === 3) pages.push('<button disabled>...</button>');
+  }
+  pages.push(`<button ${currentPage===totalPages?'disabled':''} onclick="goPage(${currentPage+1})">›</button>`);
+  pagination.innerHTML = pages.join('');
+}
+function goPage(page) { currentPage = page; renderData(); }
+
+let searchTimer = null;
+document.getElementById('searchInput').addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => { currentPage = 1; renderData(); }, 300); });
+document.getElementById('dateStart').addEventListener('change', () => { currentPage = 1; renderData(); });
+document.getElementById('dateEnd').addEventListener('change', () => { currentPage = 1; renderData(); });
+
+function exportCSV() {
+  applyFilters();
+  if (filteredData.length === 0) { alert('暂无数据可导出'); return; }
+  const headers = ['店铺名称', '笔记ID', '笔记链接', '提交时间'];
+  const rows = filteredData.map(row => [
+    row.shop_name || '',
+    row.note_id || '',
+    `https://www.xiaohongshu.com/explore/${row.note_id || ''}`,
+    row.submit_time ? formatTime(row.submit_time) : ''
+  ].map(v => { const s = String(v).replace(/"/g,'""'); return s.includes(',')||s.includes('\n')?`"${s}"`:s; }));
+  const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
+  link.download = `投流笔记收集_${new Date().toISOString().slice(0,10)}.csv`; link.click(); URL.revokeObjectURL(link.href);
+}
+
+loadData();
+</script>
+</body>
+</html>

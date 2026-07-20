@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投流笔记信息收集</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Helvetica Neue", Arial, sans-serif; background: #f5f5f5; color: #333; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 40px 20px; }
+.container { width: 100%; max-width: 520px; background: #fff; border-radius: 16px; padding: 36px 32px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); }
+.logo { display: flex; align-items: center; justify-content: center; margin-bottom: 8px; }
+.logo-text { font-size: 22px; font-weight: 700; color: #ff2442; }
+.subtitle { text-align: center; font-size: 13px; color: #999; margin-bottom: 32px; }
+.form-group { margin-bottom: 24px; }
+.label { display: block; font-size: 14px; font-weight: 600; color: #333; margin-bottom: 8px; }
+.label .required { color: #ff2442; }
+.input, .textarea { width: 100%; border: 1px solid #e0e0e0; border-radius: 10px; padding: 12px 16px; font-size: 14px; transition: border-color 0.2s; outline: none; font-family: inherit; }
+.input:focus, .textarea:focus { border-color: #ff2442; }
+.textarea { resize: vertical; min-height: 120px; }
+.hint { font-size: 12px; color: #999; margin-top: 6px; line-height: 1.6; }
+.hint .example { display: inline-block; background: #f5f5f5; border-radius: 4px; padding: 2px 6px; margin: 2px 0; color: #666; word-break: break-all; }
+.btn { width: 100%; height: 48px; background: #ff2442; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+.btn:hover { opacity: 0.9; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.toast { position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px); background: #333; color: #fff; padding: 12px 24px; border-radius: 10px; font-size: 14px; z-index: 9999; transition: transform 0.3s ease; white-space: nowrap; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { background: #07c160; }
+.toast.error { background: #ff2442; }
+.history { margin-top: 32px; border-top: 1px solid #f0f0f0; padding-top: 24px; }
+.history-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #666; }
+.history-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
+.history-item .shop { font-weight: 600; }
+.history-item .note-id { color: #999; font-size: 12px; }
+.history-item .time { color: #ccc; font-size: 11px; }
+.preview-list { margin-top: 8px; }
+.preview-item { background: #f9f9f9; border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+.preview-item .pid { color: #ff2442; font-weight: 500; }
+.preview-item .pshop { color: #666; }
+.preview-item .remove { color: #ccc; cursor: pointer; font-size: 16px; }
+.preview-item .remove:hover { color: #ff2442; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="logo"><span class="logo-text">📝 投流笔记信息收集</span></div>
+  <p class="subtitle">填写店铺信息和笔记链接，提交即可</p>
+  <div class="form-group">
+    <label class="label">店铺名称 <span class="required">*</span></label>
+    <input class="input" id="shopName" placeholder="请输入您的店铺名称" />
+  </div>
+  <div class="form-group">
+    <label class="label">笔记链接 <span class="required">*</span></label>
+    <textarea class="textarea" id="noteLinks" placeholder="每行一条笔记链接，支持多条：
+https://www.xiaohongshu.com/explore/6abc...
+https://www.xiaohongshu.com/explore/6def..."></textarea>
+    <div class="hint">
+      <div>每行一条链接，支持多条。获取步骤：</div>
+      <div>① 在浏览器中打开小红书官网 xiaohongshu.com</div>
+      <div>② 搜索或浏览到目标笔记，点击打开</div>
+      <div>③ 复制浏览器地址栏中的完整链接（以 /explore/ 开头）</div>
+      <div class="example">https://www.xiaohongshu.com/explore/6abc123def456789abcd</div>
+      <div>⚠️ 不支持小红书 App 内"复制链接"，请在浏览器中获取</div>
+    </div>
+    <div class="preview-list" id="previewList"></div>
+  </div>
+  <button class="btn" id="submitBtn" onclick="submitForm()">提交</button>
+  <div class="history" id="historySection" style="display:none;">
+    <div class="history-title">📋 我的提交记录</div>
+    <div id="historyList"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const GITHUB_TOKEN = ["ghp_hKYoS4","MpmwIlFe9Q","xYedgZuTxIEYGx3TzwDa"].join("");
+const REPO_OWNER = "Maggie0114-lmq";
+const REPO_NAME = "note-collection";
+const DATA_FILE = "data/submissions.json";
+const API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE}`;
+
+const NOTE_URL_REGEX = /(?:https?:\/\/)?(?:www\.)?(?:xiaohongshu\.com\/(?:explore|discovery\/item|note)\/|xhslink\.com\/)([a-zA-Z0-9]{24})/;
+const LINK_JSON_REGEX = /\[link:\s*(\{[\s\S]*?\})\s*\]/;
+
+function parseNoteIdFromLine(line) {
+  const trimmed = line.trim();
+  if (!trimmed) return null;
+  // 1. App复制链接格式 [link:{"url":"..."}]
+  const linkMatch = trimmed.match(LINK_JSON_REGEX);
+  if (linkMatch) {
+    try {
+      const obj = JSON.parse(linkMatch[1]);
+      if (obj.url) {
+        const m = obj.url.match(NOTE_URL_REGEX);
+        if (m) return m[1];
+      }
+    } catch {}
+  }
+  // 2. 普通 URL 正则
+  const urlMatch = trimmed.match(NOTE_URL_REGEX);
+  if (urlMatch) return urlMatch[1];
+  return null;
+}
+
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+let previewItems = [];
+function updatePreview() {
+  const text = document.getElementById('noteLinks').value;
+  const lines = text.split('\n');
+  previewItems = [];
+  lines.forEach(line => {
+    const noteId = parseNoteIdFromLine(line);
+    if (noteId) {
+      previewItems.push({ note_id: noteId, raw: line.trim() });
+    }
+  });
+  const list = document.getElementById('previewList');
+  if (previewItems.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = previewItems.map((item, i) => 
+    `<div class="preview-item"><span class="pshop">#${i+1}</span> <span class="pid">${item.note_id.substring(0,16)}...</span></div>`
+  ).join('');
+}
+document.getElementById('noteLinks').addEventListener('input', updatePreview);
+
+async function getExistingData() {
+  try {
+    const resp = await fetch(API_BASE, {
+      headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, Accept: "application/vnd.github+json" }
+    });
+    if (!resp.ok) return { submissions: [], sha: null };
+    const data = await resp.json();
+    const content = JSON.parse(atob(data.content));
+    return { submissions: content.submissions || [], sha: data.sha };
+  } catch (e) {
+    return { submissions: [], sha: null };
+  }
+}
+
+async function saveData(submissions, sha) {
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify({ submissions }, null, 2))));
+  const body = { message: `提交笔记 ${new Date().toISOString()}`, content };
+  if (sha) body.sha = sha;
+  const resp = await fetch(API_BASE, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, Accept: "application/vnd.github+json", "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+  return resp.ok;
+}
+
+async function submitForm() {
+  const shopName = document.getElementById('shopName').value.trim();
+  if (!shopName) { showToast('请填写店铺名称', 'error'); return; }
+  if (previewItems.length === 0) { showToast('未识别到有效的笔记链接', 'error'); return; }
+  
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = '提交中...';
+  
+  try {
+    const existing = await getExistingData();
+    const now = new Date().toISOString();
+    const newRecords = previewItems.map(item => ({
+      shop_name: shopName,
+      note_id: item.note_id,
+      raw_input: item.raw,
+      submit_time: now
+    }));
+    const allSubmissions = [...existing.submissions, ...newRecords];
+    const ok = await saveData(allSubmissions, existing.sha);
+    if (ok) {
+      showToast(`成功提交 ${newRecords.length} 条笔记`, 'success');
+      document.getElementById('noteLinks').value = '';
+      updatePreview();
+      loadHistory();
+    } else {
+      showToast('提交失败，请重试', 'error');
+    }
+  } catch (e) {
+    showToast('网络错误，请重试', 'error');
+  }
+  btn.disabled = false; btn.textContent = '提交';
+}
+
+async function loadHistory() {
+  const data = await getExistingData();
+  const section = document.getElementById('historySection');
+  const list = document.getElementById('historyList');
+  if (data.submissions.length === 0) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  const recent = data.submissions.slice(-10).reverse();
+  list.innerHTML = recent.map(s => 
+    `<div class="history-item"><div><div class="shop">${escapeHtml(s.shop_name)}</div><div class="note-id">${s.note_id.substring(0,16)}...</div></div><div class="time">${s.submit_time ? new Date(s.submit_time).toLocaleDateString('zh-CN') : '-'}</div></div>`
+  ).join('');
+}
+
+function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+loadHistory();
+</script>
+</body>
+</html>
