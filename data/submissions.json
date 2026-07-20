@@ -1,16 +1,22 @@
 {
   "submissions": [
     {
-      "shop_name": "ä¸ç¢ç¢",
+      "shop_name": "Ã¤Â¸ÂÃ§Â¢ÂÃ§Â¢Â",
       "note_id": "6a5c4c0300000000110124d4",
       "raw_input": "https://www.xiaohongshu.com/explore/6a5c4c0300000000110124d4?xsec_token=ABNMYCXSLX0nYSA-n5Y4HO52Ru3dyn6UFo8pSDS_JcM_4=&xsec_source=pc_user",
       "submit_time": "2026-07-20T11:39:06.000Z"
     },
     {
-      "shop_name": "拉米米",
+      "shop_name": "æç±³ç±³",
       "note_id": "6a5c4c0300000000110124d4",
       "raw_input": "https://www.xiaohongshu.com/explore/6a5c4c0300000000110124d4?xsec_token=ABNMYCXSLX0nYSA-n5Y4HO52Ru3dyn6UFo8pSDS_JcM_4=&xsec_source=pc_user",
       "submit_time": "2026-07-20T11:39:14.467Z"
+    },
+    {
+      "shop_name": "拉米米",
+      "note_id": "6a4f1dac000000000f014188",
+      "raw_input": "https://www.xiaohongshu.com/explore/6a4f1dac000000000f014188?xsec_token=ABzU-MasjTOMNAz-jl0BxZsCF9XVYp0yN9B7N0nBPc_lU=&xsec_source=pc_user",
+      "submit_time": "2026-07-20T11:40:28.417Z"
     }
   ]
 }
