@@ -138,7 +138,18 @@ async function getExistingData() {
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     const content = JSON.parse(new TextDecoder('utf-8').decode(bytes));
-    return { submissions: content.submissions || [], sha: data.sha };
+    // 修复历史双重编码的乱码：如果 shop_name 包含 \xc3\xa6 等 mojibake 特征，尝试修复
+    const subs = (content.submissions || []).map(s => {
+      if (s.shop_name && /[\xc3\xa6\xc2\x83\xc3\xa7]/.test(s.shop_name)) {
+        try {
+          // 把双重编码的字符串还原：latin1 → utf-8
+          const fixed = decodeURIComponent(escape(s.shop_name));
+          if (fixed !== s.shop_name) s.shop_name = fixed;
+        } catch(e) {}
+      }
+      return s;
+    });
+    return { submissions: subs, sha: data.sha };
   } catch (e) {
     return { submissions: [], sha: null };
   }

@@ -138,7 +138,12 @@ async function loadData() {
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     const content = JSON.parse(new TextDecoder('utf-8').decode(bytes));
-    allData = content.submissions || [];
+    allData = (content.submissions || []).map(s => {
+      if (s.shop_name && /[\xc3\xa6\xc2\x83\xc3\xa7]/.test(s.shop_name)) {
+        try { const f = decodeURIComponent(escape(s.shop_name)); if (f !== s.shop_name) s.shop_name = f; } catch(e) {}
+      }
+      return s;
+    });
     if (allData.length === 0) {
       tbody.innerHTML = '<tr><td colspan="4"><div class="empty">暂无提交记录</div></td></tr>';
       updateStats([]);
