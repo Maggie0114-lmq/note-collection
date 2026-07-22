@@ -19,6 +19,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 .textarea { resize: vertical; min-height: 120px; }
 .hint { font-size: 12px; color: #999; margin-top: 6px; line-height: 1.6; }
 .hint .example { display: inline-block; background: #f5f5f5; border-radius: 4px; padding: 2px 6px; margin: 2px 0; color: #666; word-break: break-all; }
+.note-type-group { display: flex; gap: 12px; margin-bottom: 16px; }
+.note-type-option { flex: 1; border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px; text-align: center; cursor: pointer; transition: all 0.2s; font-size: 14px; font-weight: 500; }
+.note-type-option.selected { border-color: #ff2442; background: #fff5f6; color: #ff2442; }
+.note-type-option .icon { font-size: 20px; display: block; margin-bottom: 4px; }
 .btn { width: 100%; height: 48px; background: #ff2442; color: #fff; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
 .btn:hover { opacity: 0.9; }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -26,18 +30,12 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
 .toast.show { transform: translateX(-50%) translateY(0); }
 .toast.success { background: #07c160; }
 .toast.error { background: #ff2442; }
-.history { margin-top: 32px; border-top: 1px solid #f0f0f0; padding-top: 24px; }
-.history-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #666; }
-.history-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
-.history-item .shop { font-weight: 600; }
-.history-item .note-id { color: #999; font-size: 12px; }
-.history-item .time { color: #ccc; font-size: 11px; }
 .preview-list { margin-top: 8px; }
 .preview-item { background: #f9f9f9; border-radius: 8px; padding: 8px 12px; margin-bottom: 6px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
 .preview-item .pid { color: #ff2442; font-weight: 500; }
-.preview-item .pshop { color: #666; }
-.preview-item .remove { color: #ccc; cursor: pointer; font-size: 16px; }
-.preview-item .remove:hover { color: #ff2442; }
+.preview-item .ptype { font-size: 11px; padding: 2px 8px; border-radius: 4px; }
+.preview-item .ptype.goods { background: #ffeael; color: #ff2442; }
+.preview-item .ptype.normal { background: #e8f5e9; color: #07c160; }
 </style>
 </head>
 <body>
@@ -47,6 +45,19 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
   <div class="form-group">
     <label class="label">店铺名称 <span class="required">*</span></label>
     <input class="input" id="shopName" placeholder="请输入您的店铺名称" />
+  </div>
+  <div class="form-group">
+    <label class="label">笔记类型 <span class="required">*</span></label>
+    <div class="note-type-group">
+      <div class="note-type-option selected" data-type="goods" onclick="selectNoteType('goods')">
+        <span class="icon">📦</span>
+        商品笔记
+      </div>
+      <div class="note-type-option" data-type="normal" onclick="selectNoteType('normal')">
+        <span class="icon">📝</span>
+        普通笔记
+      </div>
+    </div>
   </div>
   <div class="form-group">
     <label class="label">笔记链接 <span class="required">*</span></label>
@@ -79,10 +90,18 @@ const API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/conten
 const NOTE_URL_REGEX = /(?:https?:\/\/)?(?:www\.)?(?:xiaohongshu\.com\/(?:explore|discovery\/item|note)\/|xhslink\.com\/)([a-zA-Z0-9]{24})/;
 const LINK_JSON_REGEX = /\[link:\s*(\{[\s\S]*?\})\s*\]/;
 
+let currentNoteType = 'goods';
+
+function selectNoteType(type) {
+  currentNoteType = type;
+  document.querySelectorAll('.note-type-option').forEach(el => {
+    el.classList.toggle('selected', el.dataset.type === type);
+  });
+}
+
 function parseNoteIdFromLine(line) {
   const trimmed = line.trim();
   if (!trimmed) return null;
-  // 1. App复制链接格式 [link:{"url":"..."}]
   const linkMatch = trimmed.match(LINK_JSON_REGEX);
   if (linkMatch) {
     try {
@@ -93,7 +112,6 @@ function parseNoteIdFromLine(line) {
       }
     } catch {}
   }
-  // 2. 普通 URL 正则
   const urlMatch = trimmed.match(NOTE_URL_REGEX);
   if (urlMatch) return urlMatch[1];
   return null;
@@ -114,13 +132,15 @@ function updatePreview() {
   lines.forEach(line => {
     const noteId = parseNoteIdFromLine(line);
     if (noteId) {
-      previewItems.push({ note_id: noteId, raw: line.trim() });
+      previewItems.push({ note_id: noteId, raw: line.trim(), note_type: currentNoteType });
     }
   });
   const list = document.getElementById('previewList');
   if (previewItems.length === 0) { list.innerHTML = ''; return; }
+  const typeLabel = currentNoteType === 'goods' ? '商品笔记' : '普通笔记';
+  const typeClass = currentNoteType === 'goods' ? 'goods' : 'normal';
   list.innerHTML = previewItems.map((item, i) => 
-    `<div class="preview-item"><span class="pshop">#${i+1}</span> <span class="pid">${item.note_id.substring(0,16)}...</span></div>`
+    `<div class="preview-item"><span>#${i+1} ${item.note_id.substring(0,16)}...</span><span class="ptype ${typeClass}">${typeLabel}</span></div>`
   ).join('');
 }
 document.getElementById('noteLinks').addEventListener('input', updatePreview);
@@ -132,16 +152,13 @@ async function getExistingData() {
     });
     if (!resp.ok) return { submissions: [], sha: null };
     const data = await resp.json();
-    // UTF-8 安全解码：base64 → Uint8Array → TextDecoder
     const binary = atob(data.content);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     const content = JSON.parse(new TextDecoder('utf-8').decode(bytes));
-    // 修复历史双重编码的乱码：如果 shop_name 包含 \xc3\xa6 等 mojibake 特征，尝试修复
     const subs = (content.submissions || []).map(s => {
       if (s.shop_name && /[\xc3\xa6\xc2\x83\xc3\xa7]/.test(s.shop_name)) {
         try {
-          // 把双重编码的字符串还原：latin1 → utf-8
           const fixed = decodeURIComponent(escape(s.shop_name));
           if (fixed !== s.shop_name) s.shop_name = fixed;
         } catch(e) {}
@@ -155,7 +172,6 @@ async function getExistingData() {
 }
 
 async function saveData(submissions, sha) {
-  // UTF-8 安全编码：TextEncoder → Uint8Array → base64
   const jsonStr = JSON.stringify({ submissions }, null, 2);
   const utf8Bytes = new TextEncoder().encode(jsonStr);
   let binary = '';
@@ -185,6 +201,7 @@ async function submitForm() {
     const newRecords = previewItems.map(item => ({
       shop_name: shopName,
       note_id: item.note_id,
+      note_type: item.note_type,
       raw_input: item.raw,
       submit_time: now
     }));
@@ -202,8 +219,6 @@ async function submitForm() {
   }
   btn.disabled = false; btn.textContent = '提交';
 }
-
-function escapeHtml(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 </script>
 </body>
 </html>
