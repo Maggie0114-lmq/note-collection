@@ -36,6 +36,13 @@
       "note_type": "goods",
       "raw_input": "https://www.xiaohongshu.com/explore/6a38a2e2000000000f01d4f9?xsec_token=AB506uZa4c2uNbGfMbbA9-p5tvRhpaG0U-ZlyTOU_eUxk=&xsec_source=pc_feed",
       "submit_time": "2026-07-22T11:43:34.296Z"
+    },
+    {
+      "shop_name": "巴啦啦",
+      "note_id": "6a39e1df000000001102c317",
+      "note_type": "normal",
+      "raw_input": "https://www.xiaohongshu.com/explore/6a39e1df000000001102c317?xsec_token=ABf0m5Cvftbyk0pY2b1k6YWiQVbI6r7O4SDYWb9YUwFMY=&xsec_source=pc_feed",
+      "submit_time": "2026-07-22T12:15:07.115Z"
     }
   ]
 }
