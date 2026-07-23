@@ -75,8 +75,8 @@ tr:hover { background: #fafafa; }
   </div>
 </div>
 <div class="tabs">
-  <div class="tab active" data-tab="goods" onclick="switchTab('goods')">📦 商品笔记 <span class="count" id="countGoods">0</span></div>
-  <div class="tab" data-tab="normal" onclick="switchTab('normal')">📝 普通笔记 <span class="count" id="countNormal">0</span></div>
+  <div class="tab active" data-tab="normal" onclick="switchTab('normal')">📝 普通笔记 <span class="count" id="countNormal">0</span></div>
+  <div class="tab" data-tab="goods" onclick="switchTab('goods')">📦 商品笔记 <span class="count" id="countGoods">0</span></div>
 </div>
 <div class="stats-bar">
   <div class="stat-card"><div class="value" id="statTotal">-</div><div class="label">当前Tab提交数</div></div>
@@ -98,7 +98,7 @@ const DATA_FILE = "data/submissions.json";
 const API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${DATA_FILE}`;
 const PAGE_SIZE = 50;
 let currentPage = 1, allData = [], filteredData = [], sortColumn = 'submit_time', sortDir = 'desc';
-let activeTab = 'goods';
+let activeTab = 'normal';
 
 function setDefaultDates() {
   const end = new Date();
