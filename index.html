@@ -49,13 +49,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC"
   <div class="form-group">
     <label class="label">笔记类型 <span class="required">*</span></label>
     <div class="note-type-group">
-      <div class="note-type-option selected" data-type="goods" onclick="selectNoteType('goods')">
-        <span class="icon">📦</span>
-        商品笔记
-      </div>
-      <div class="note-type-option" data-type="normal" onclick="selectNoteType('normal')">
+      <div class="note-type-option selected" data-type="normal" onclick="selectNoteType('normal')">
         <span class="icon">📝</span>
         普通笔记
+      </div>
+      <div class="note-type-option" data-type="goods" onclick="selectNoteType('goods')">
+        <span class="icon">📦</span>
+        商品笔记
       </div>
     </div>
   </div>
@@ -90,7 +90,7 @@ const API_BASE = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/conten
 const NOTE_URL_REGEX = /(?:https?:\/\/)?(?:www\.)?(?:xiaohongshu\.com\/(?:explore|discovery\/item|note)\/|xhslink\.com\/)([a-zA-Z0-9]{24})/;
 const LINK_JSON_REGEX = /\[link:\s*(\{[\s\S]*?\})\s*\]/;
 
-let currentNoteType = 'goods';
+let currentNoteType = 'normal';
 
 function selectNoteType(type) {
   currentNoteType = type;
