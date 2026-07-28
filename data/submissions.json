@@ -1233,6 +1233,13 @@
       "note_type": "goods",
       "raw_input": "https://www.xiaohongshu.com/explore/6a38a47d000000002100848e?xsec_token=ABFDEF-HA9TbwJSze84qAGfSFUUNMrP7nrkcQuBT0vNFE=&xsec_source=pc_user",
       "submit_time": "2026-07-28T03:23:53.360Z"
+    },
+    {
+      "shop_name": "披萨是一只猫的店",
+      "note_id": "6a67fd0e000000001b01ec14",
+      "note_type": "normal",
+      "raw_input": "https://www.xiaohongshu.com/explore/6a67fd0e000000001b01ec14?xsec_token=ABkvzlMXPzHaotrOuV0aFCnXxGz44ZVi8XmTz_A1AbT5s=&xsec_source=pc_user",
+      "submit_time": "2026-07-28T03:25:32.910Z"
     }
   ]
 }
