@@ -2829,6 +2829,13 @@
       "note_type": "goods",
       "raw_input": "https://www.xiaohongshu.com/explore/6a491222000000001503ec72?xsec_token=ABche5zktOZLQEhci0yu0FHSGCEuJ537zTyhL_DiNqXQg=&xsec_source=pc_search",
       "submit_time": "2026-08-03T05:26:31.173Z"
+    },
+    {
+      "shop_name": "Starwood Pet Store",
+      "note_id": "6a6d5eaa000000000801188e",
+      "note_type": "normal",
+      "raw_input": "https://www.xiaohongshu.com/explore/6a6d5eaa000000000801188e?xsec_token=AB03holHX2ndCShkWimCVS7p9R3BXlNK_0r0O7fc3EQNY=&xsec_source=pc_trdark",
+      "submit_time": "2026-08-03T06:05:17.711Z"
     }
   ]
 }
