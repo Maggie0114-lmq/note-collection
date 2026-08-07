@@ -4572,6 +4572,41 @@
       "note_type": "goods",
       "raw_input": "https://www.xiaohongshu.com/explore/6a75744f0000000025008f8a?xsec_token=ABvGSwgJZ1TLRMtP9AP1dv8v8QcN-MSMR1GfXB9Zm9V9o=&xsec_source=pc_trdark",
       "submit_time": "2026-08-07T06:38:15.063Z"
+    },
+    {
+      "shop_name": "阿陶邮局",
+      "note_id": "6a42611000000000210092a8",
+      "note_type": "goods",
+      "raw_input": "https://www.xiaohongshu.com/explore/6a42611000000000210092a8?xsec_token=AB8ph7lOkoa621lp3cklmPSjBkeCllbi-kIVcl-kmnKFo=&xsec_source=pc_user",
+      "submit_time": "2026-08-07T06:39:50.155Z"
+    },
+    {
+      "shop_name": "阿陶邮局",
+      "note_id": "6a11ac240000000035022e43",
+      "note_type": "goods",
+      "raw_input": "https://www.xiaohongshu.com/explore/6a11ac240000000035022e43?xsec_token=ABmOV3D6hJbfs4GOIrCQh_d_VTHTTBbpdRkNamkuJVQTI=&xsec_source=pc_user",
+      "submit_time": "2026-08-07T06:39:50.155Z"
+    },
+    {
+      "shop_name": "阿陶邮局",
+      "note_id": "69fc46de00000000360198c1",
+      "note_type": "goods",
+      "raw_input": "https://www.xiaohongshu.com/explore/69fc46de00000000360198c1?xsec_token=ABlQibHfRtNYoWjwKC8OV-Zo2mYQjs6NndeWT1IEAhDMU=&xsec_source=pc_user",
+      "submit_time": "2026-08-07T06:39:50.155Z"
+    },
+    {
+      "shop_name": "阿陶邮局",
+      "note_id": "69d8ed53000000001a02b3d7",
+      "note_type": "goods",
+      "raw_input": "https://www.xiaohongshu.com/explore/69d8ed53000000001a02b3d7?xsec_token=ABTmRFYujO64ozcm1EaNe8ADZKFNZlPo9kUP7SkXT3Mwo=&xsec_source=pc_user",
+      "submit_time": "2026-08-07T06:39:50.155Z"
+    },
+    {
+      "shop_name": "阿陶邮局",
+      "note_id": "69c7ba160000000023005719",
+      "note_type": "goods",
+      "raw_input": "http://xiaohongshu.com/explore/69c7ba160000000023005719?xsec_token=ABPpFNet_0FykNTuJsgj0aN5D3VorkSC5zAP15d7WAdGA=&xsec_source=pc_user",
+      "submit_time": "2026-08-07T06:39:50.155Z"
     }
   ]
 }
