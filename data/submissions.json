@@ -4607,6 +4607,34 @@
       "note_type": "goods",
       "raw_input": "http://xiaohongshu.com/explore/69c7ba160000000023005719?xsec_token=ABPpFNet_0FykNTuJsgj0aN5D3VorkSC5zAP15d7WAdGA=&xsec_source=pc_user",
       "submit_time": "2026-08-07T06:39:50.155Z"
+    },
+    {
+      "shop_name": "东逸整木菜板",
+      "note_id": "6a6c3ea9000000002402d0f9",
+      "note_type": "goods",
+      "raw_input": "https://www.xiaohongshu.com/explore/6a6c3ea9000000002402d0f9?xsec_token=AB2-UHx8ENHtMI98L0pSGTI0Rxc7ssmqVqKAFDsTyvv7A=&xsec_source=pc_search",
+      "submit_time": "2026-08-07T07:08:12.399Z"
+    },
+    {
+      "shop_name": "东逸整木菜板",
+      "note_id": "6a6d58de0000000006006c2c",
+      "note_type": "goods",
+      "raw_input": "https://www.xiaohongshu.com/explore/6a6d58de0000000006006c2c?xsec_token=AB_0fSuGjQGJM2QGGNLOjeVk49-r0QoPavr8Ttc2hoBCA=&xsec_source=pc_search",
+      "submit_time": "2026-08-07T07:08:12.399Z"
+    },
+    {
+      "shop_name": "东逸整木菜板",
+      "note_id": "6a719ae80000000008010731",
+      "note_type": "goods",
+      "raw_input": "https://www.xiaohongshu.com/explore/6a719ae80000000008010731?xsec_token=AB1teSLdqLsNCiOD6UEOY-UEZrK2XJQDbPVBofwVsMuMg=&xsec_source=pc_search",
+      "submit_time": "2026-08-07T07:08:12.399Z"
+    },
+    {
+      "shop_name": "东逸整木菜板",
+      "note_id": "6a754e95000000003301a452",
+      "note_type": "goods",
+      "raw_input": "https://www.xiaohongshu.com/explore/6a754e95000000003301a452?xsec_token=ABORyUvRj2YgNqQTwV2EIDA8ixt0dDNGAhTp5yK4RAlW0=&xsec_source=pc_search",
+      "submit_time": "2026-08-07T07:08:12.399Z"
     }
   ]
 }
