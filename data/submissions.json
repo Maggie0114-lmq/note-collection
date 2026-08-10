@@ -5804,6 +5804,20 @@
       "note_type": "goods",
       "raw_input": "https://www.xiaohongshu.com/explore/6a79246c0000000027020912?xsec_token=ABR_CzWvclHtPooXFC8QjMHetbeVWr1Uwa9Hnzc9_a1VI=&xsec_source=pc_trdark",
       "submit_time": "2026-08-10T05:18:54.240Z"
+    },
+    {
+      "shop_name": "猫玩所Mewso",
+      "note_id": "6a7851b4000000000502afec",
+      "note_type": "goods",
+      "raw_input": "https://www.xiaohongshu.com/explore/6a7851b4000000000502afec?xsec_token=ABzFuSvTEn9GLrXaLsqQajgl9uZ1PVPv2v_PZbwx1sPhU=&xsec_source=pc_trdark",
+      "submit_time": "2026-08-10T05:29:21.200Z"
+    },
+    {
+      "shop_name": "猫玩所Mewso",
+      "note_id": "6a7864e200000000080103c5",
+      "note_type": "goods",
+      "raw_input": "https://www.xiaohongshu.com/explore/6a7864e200000000080103c5?xsec_token=ABzFuSvTEn9GLrXaLsqQajggTF9SX6_ikydFbpDG1EghE=&xsec_source=pc_trdark",
+      "submit_time": "2026-08-10T05:29:21.200Z"
     }
   ]
 }
