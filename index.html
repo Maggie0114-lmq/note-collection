@@ -128,10 +128,20 @@ async function getExistingData() {
     });
     if (!resp.ok) return { submissions: [], sha: null };
     const data = await resp.json();
-    const binary = atob(data.content);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-    const content = JSON.parse(new TextDecoder('utf-8').decode(bytes));
+    let jsonText;
+    if (data.content) {
+      const binary = atob(data.content.replace(/\n/g, ''));
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      jsonText = new TextDecoder('utf-8').decode(bytes);
+    } else if (data.download_url) {
+      const rawResp = await fetch(data.download_url + '?t=' + Date.now(), { cache: 'no-store' });
+      if (!rawResp.ok) throw new Error('数据文件下载失败: ' + rawResp.status);
+      jsonText = await rawResp.text();
+    } else {
+      throw new Error('数据文件内容为空');
+    }
+    const content = JSON.parse(jsonText);
     const subs = (content.submissions || []).map(s => {
       if (s.shop_name && /[\xc3\xa6\xc2\x83\xc3\xa7]/.test(s.shop_name)) {
         try {
