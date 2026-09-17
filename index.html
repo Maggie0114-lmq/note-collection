@@ -134,10 +134,17 @@ async function getExistingData() {
       const bytes = new Uint8Array(binary.length);
       for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
       jsonText = new TextDecoder('utf-8').decode(bytes);
-    } else if (data.download_url) {
-      const rawResp = await fetch(data.download_url + '?t=' + Date.now(), { cache: 'no-store' });
-      if (!rawResp.ok) throw new Error('数据文件下载失败: ' + rawResp.status);
-      jsonText = await rawResp.text();
+    } else if (data.sha) {
+      const blobResp = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/git/blobs/${data.sha}`, {
+        headers: { Authorization: `Bearer ${GITHUB_TOKEN}`, Accept: "application/vnd.github+json" },
+        cache: 'no-store'
+      });
+      if (!blobResp.ok) throw new Error('数据文件读取失败: ' + blobResp.status);
+      const blob = await blobResp.json();
+      const binary = atob((blob.content || '').replace(/\n/g, ''));
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      jsonText = new TextDecoder('utf-8').decode(bytes);
     } else {
       throw new Error('数据文件内容为空');
     }
